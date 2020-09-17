@@ -1,15 +1,11 @@
-# next-offline example
+## Using GitHub actions and Vercel for end-to-end tests
 
-This example demonstrates how to use the [next-offline plugin](https://github.com/hanford/next-offline) It includes manifest.json to install app via chrome
+You can get the URL of Vercel websites from `github.event.deployment_status.target_url` on` deployment_status` workflow. However, workflows on "deployment_status" don't report under the check. So you need to use the Github API to communicate the results to the PR.
 
-## How to use
+## Only Run Github Actions on Specific Branches
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init) or [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/) to bootstrap the example:
+In workflows on "deployment_status", `github.ref` may be empty, so you need to use `${{ github.repository }}`.
 
-```bash
-npx create-next-app --example with-next-offline with-next-offline-app
-# or
-yarn create next-app --example with-next-offline with-next-offline-app
-```
+## Take screenshots in the E2E test  very easily.
 
-Deploy it to the cloud with [Vercel](https://vercel.com/import?filter=next.js&utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+Use `playwright` instead of `puppeteer`.
