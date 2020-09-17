@@ -6,6 +6,9 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
+    "build:e2e": "tsc --project ./e2e/tsconfig.json",
+    "start:e2e": "node ./e2e/dist/index.js",
+    "dev:e2e": "yarn build:e2e && yarn start:e2e",
     "export": "cross-env NEXT_EXPORT=true next build && cross-env NEXT_EXPORT=true next export"
   },
   "dependencies": {
@@ -15,7 +18,13 @@
     "react-dom": "16.12.0"
   },
   "devDependencies": {
-    "cross-env": "6.0.3"
+    "@types/node": "^14.10.3",
+    "@types/react": "^16.9.49",
+    "@types/react-dom": "^16.9.8",
+    "cross-env": "6.0.3",
+    "playwright": "^1.4.0",
+    "tslib": "^2.0.1",
+    "typescript": "^4.0.2"
   },
   "license": "MIT"
 }
