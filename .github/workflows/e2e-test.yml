@@ -1,0 +1,82 @@
+name: E2E tests
+on: [deployment_status]
+
+jobs:
+  set_pending:
+    name: Register pending E2E tests
+    if: github.event.deployment_status.state == 'pending'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Set status to "pending"
+        run: |
+          curl -L -X POST \
+          --url https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }} \
+          --header 'authorization:Bearer ${{ secrets.GITHUB_TOKEN }}' \
+          --header 'content-type:application/json' \
+          --data '{
+            "state":"pending",
+            "context":"e2e-tests",
+            "description":"Waiting for Vercel Preview URL"
+            }'
+  run_tests:
+    name: Run E2E tests on deployment success
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set status to "running"
+        run: |
+          GITHUB_WORKFLOW_URL=https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+          curl -L -X POST \
+          --url https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }} \
+          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+          --header 'content-type: application/json' \
+          --data '{
+            "state": "pending",
+            "context": "e2e-tests",
+            "description": "Realizando testes E2E contra a Preview URL",
+            "target_url": "'${GITHUB_WORKFLOW_URL}'"
+            }'
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+
+      - uses: microsoft/playwright-github-action@v1
+      - run: yarn build:e2e
+      - run: yarn start:e2e
+        env:
+          BASE_URL: ${{ github.event.deployment_status.target_url }}
+      - uses: actions/upload-artifact@v1
+        with:
+          name: download-screenshots
+          path: screenshots
+
+      - name: Request for Github API final status
+        if: always()
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: |
+          GITHUB_WORKFLOW_URL=https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+          JOB_STATUS=$(echo ${JOB_CONTEXT} | jq --raw-output '.status | ascii_downcase')
+          curl -L -X POST \
+          --url https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }} \
+          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+          --header 'content-type: application/json' \
+          --data '{
+            "state": "'${JOB_STATUS}'",
+            "context": "e2e-tests",
+            "description": "Finalizados os testes E2E contra a Preview URL.",
+            "target_url": "'${GITHUB_WORKFLOW_URL}'"
+            }'
