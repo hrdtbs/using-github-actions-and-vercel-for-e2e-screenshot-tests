@@ -3,7 +3,7 @@ on: [deployment_status]
 
 jobs:
   set_pending:
-    if: github.ref == 'refs/heads/master' && github.event.deployment_status.state == 'pending'
+    if: ${{ github.repository }} == 'refs/heads/master' && github.event.deployment_status.state == 'pending'
     name: Register pending E2E tests
     runs-on: ubuntu-latest
 
@@ -22,7 +22,7 @@ jobs:
             "description":"Waiting for Vercel Preview URL"
             }'
   run_tests:
-    if: github.ref == 'refs/heads/master' && github.event.deployment_status.state == 'success'
+    if: ${{ github.repository }} == 'refs/heads/master' && github.event.deployment_status.state == 'success'
     name: Run E2E tests on deployment success
     runs-on: ubuntu-latest
     strategy:
