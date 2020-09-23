@@ -1,11 +1,11 @@
 ## Using GitHub actions and Vercel for end-to-end tests
 
-You can get the URL of Vercel websites from `github.event.deployment_status.target_url` on` deployment_status` workflow. However, workflows on "deployment_status" don't report under the check. So you need to use the Github API to communicate the results to the PR.
+You can get the URL of Vercel Preview from `github.event.deployment_status.target_url` on` deployment_status` workflow. However, workflows on "deployment_status" don't report under the check. So you need to use the Github API to communicate the results to the PR.
 
-## Only Run Github Actions on Specific Branches
+Or you can also use GitHub Action to wait for a Vercel deployment and get the URL of Vercel Preview on `pull_request`. 
 
-In workflows on "deployment_status", `github.ref` may be empty, so you need to use `${{ github.repository }}`.
+ex.) https://github.com/hrdtbs/wait-for-vercel
 
-## Take screenshots in the E2E test  very easily.
+## Take screenshots in the E2E test very easily.
 
 Use `playwright` instead of `puppeteer`.
