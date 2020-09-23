@@ -2,7 +2,7 @@ name: E2E tests
 on:
   pull_request:
     branches:
-      - deploy
+     - deploy
 jobs:
   run_tests:
     name: Run E2E tests on deployment success
