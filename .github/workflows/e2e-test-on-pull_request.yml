@@ -14,10 +14,9 @@ jobs:
     steps:
       - name: Waiting for 200 from the Vercel Preview
         uses: hrdtbs/wait-for-vercel@master
-        id: wait-for-vercel
+        id: vercel
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          max_timeout: 60
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
@@ -31,7 +30,7 @@ jobs:
       - run: yarn build:e2e
       - run: yarn start:e2e
         env:
-          BASE_URL: ${{ steps.wait-for-vercel.outputs.url }}
+          BASE_URL: ${{ steps.vercel.outputs.target_url }}
       - uses: actions/upload-artifact@v1
         with:
           name: download-screenshots
