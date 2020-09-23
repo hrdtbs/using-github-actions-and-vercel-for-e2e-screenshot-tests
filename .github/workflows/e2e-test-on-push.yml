@@ -1,0 +1,38 @@
+name: E2E tests
+on:
+  pull_request:
+    branches:
+     - deploy
+jobs:
+  run_tests:
+    name: Run E2E tests on deployment success
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - name: Waiting for 200 from the Vercel Preview
+        uses: hrdtbs/wait-for-vercel@master
+        id: wait-for-vercel
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          max_timeout: 60
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+
+      - uses: microsoft/playwright-github-action@v1
+      - run: yarn build:e2e
+      - run: yarn start:e2e
+        env:
+          BASE_URL: ${{ steps.wait-for-vercel.outputs.url }}
+      - uses: actions/upload-artifact@v1
+        with:
+          name: download-screenshots
+          path: screenshots
